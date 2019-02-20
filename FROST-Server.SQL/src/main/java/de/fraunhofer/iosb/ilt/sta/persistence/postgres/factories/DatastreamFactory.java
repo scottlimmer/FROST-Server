@@ -144,10 +144,22 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
         insert.set(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.set(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+
+        if (ds.isSetPhenomenonTime()) {
+            insert.set(qd.phenomenonTimeStart, new Timestamp(ds.getPhenomenonTime().getInterval().getStartMillis()));
+            insert.set(qd.phenomenonTimeEnd, new Timestamp(ds.getPhenomenonTime().getInterval().getEndMillis()));
+        } else {
+            insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+            insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        }
+
+        if (ds.isSetResultTime()) {
+            insert.set(qd.resultTimeStart, new Timestamp(ds.getResultTime().getInterval().getStartMillis()));
+            insert.set(qd.resultTimeEnd, new Timestamp(ds.getResultTime().getInterval().getEndMillis()));
+        } else {
+            insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+            insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        }
 
         insert.set(qd.getObsPropertyId(), (J) op.getId().getValue());
         insert.set(qd.getSensorId(), (J) s.getId().getValue());
@@ -181,6 +193,8 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
         updateName(datastream, update, qd, message);
         updateDescription(datastream, update, qd, message);
         updateObservationType(datastream, update, qd, message);
+        updatePhenomenonTime(datastream, update, qd, message);
+        updateResultTime(datastream, update, qd, message);
         updateProperties(datastream, update, qd, message);
         updateObservedProperty(datastream, pm, update, qd, message);
         updateSensor(datastream, pm, update, qd, message);
@@ -250,6 +264,21 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
         if (datastream.isSetProperties()) {
             update.set(qd.properties, EntityFactories.objectToJson(datastream.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
+        }
+    }
+
+    private void updatePhenomenonTime(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) {
+        if (datastream.isSetPhenomenonTime()) {
+            update.set(qd.phenomenonTimeStart, new Timestamp(datastream.getPhenomenonTime().getInterval().getStartMillis()));
+            update.set(qd.phenomenonTimeEnd, new Timestamp(datastream.getPhenomenonTime().getInterval().getEndMillis()));
+            message.addField(EntityProperty.PHENOMENONTIME);
+        }
+    }
+    private void updateResultTime(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) {
+        if (datastream.isSetResultTime()) {
+            update.set(qd.resultTimeStart, new Timestamp(datastream.getResultTime().getInterval().getStartMillis()));
+            update.set(qd.resultTimeEnd, new Timestamp(datastream.getResultTime().getInterval().getEndMillis()));
+            message.addField(EntityProperty.RESULTTIME);
         }
     }
 
