@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.sta.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
+import org.postgresql.util.PSQLException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -424,7 +425,7 @@ public class Service implements AutoCloseable {
             maybeCommitAndClose();
             response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
             return successResponse(response, 201, "Created");
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (IllegalArgumentException | PSQLException | IOException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
         }
