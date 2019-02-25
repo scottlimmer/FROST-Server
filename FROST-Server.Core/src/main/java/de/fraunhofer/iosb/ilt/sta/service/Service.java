@@ -392,7 +392,7 @@ public class Service {
             maybeCommitAndClose();
             response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
             return response.setStatus(201, "Created");
-        } catch (IllegalArgumentException | PSQLException | IOException e) {
+        } catch (IllegalArgumentException | SQLException | IOException e) {
             pm.rollbackAndClose();
             return response.setStatus(400, e.getMessage());
         }
