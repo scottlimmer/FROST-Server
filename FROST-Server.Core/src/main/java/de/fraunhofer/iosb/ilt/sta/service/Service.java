@@ -395,8 +395,7 @@ public class Service {
             pm.rollbackAndClose();
             return response.setStatus(400, e.getMessage());
         } finally {
-            LOGGER.debug("finally close connection");
-            pm.rollbackAndClose();
+            maybeRollbackAndClose();
         }
     }
 
