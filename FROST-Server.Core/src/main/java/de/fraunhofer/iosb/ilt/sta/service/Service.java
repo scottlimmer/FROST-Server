@@ -43,12 +43,10 @@ import de.fraunhofer.iosb.ilt.sta.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
-import org.postgresql.util.PSQLException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -393,9 +391,12 @@ public class Service {
             maybeCommitAndClose();
             response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
             return response.setStatus(201, "Created");
-        } catch (IllegalArgumentException | PSQLException | IOException e) {
+        } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return response.setStatus(400, e.getMessage());
+        } finally {
+            LOGGER.debug("finally close connection");
+            pm.rollbackAndClose();
         }
     }
 
